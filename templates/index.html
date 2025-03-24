@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Problem Statement Analyzer</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      color: #334e68;
+    }
+    .container {
+      max-width: 700px;
+      margin: 3rem auto;
+      padding: 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 1rem;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .btn {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-record {
+      background: #2f80ed;
+      color: white;
+    }
+    .btn-record:hover { background: #1366d6; }
+    .btn-analyze {
+      background: #27ae60;
+      color: white;
+    }
+    .btn-analyze:hover { background: #219653; }
+    .spinner {
+      display: none;
+      margin-left: 1rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid #e0e0e0;
+      border-top: 3px solid #334e68;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    pre {
+      background: #f7fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>AI Problem Statement Analyzer</h1>
+      <form method="post">
+        <textarea id="problem_statement" name="problem_statement" rows="6" placeholder="Paste or press 🎤 to speak…" required>{{ problem_statement }}</textarea>
+        <div class="btn-group">
+          <button id="start-record-btn" type="button" class="btn btn-record">🎤 Record</button>
+          <button type="submit" class="btn btn-analyze">🔍 Analyze</button>
+          <div class="spinner" id="loading-spinner"></div>
+        </div>
+      </form>
+      {% if refined_output %}
+      <pre>{{ refined_output }}</pre>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const recordBtn = document.getElementById('start-record-btn');
+    const textarea = document.getElementById('problem_statement');
+    const spinner = document.getElementById('loading-spinner');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+
+      recordBtn.onclick = () => {
+        recordBtn.disabled = true;
+        recordBtn.textContent = '🎙 Listening…';
+        recognition.start();
+      };
+      recognition.onresult = e => textarea.value = e.results[0][0].transcript;
+      recognition.onerror = () => alert('Voice recognition error');
+      recognition.onend = () => {
+        recordBtn.disabled = false;
+        recordBtn.textContent = '🎤 Record';
+      };
+    } else {
+      recordBtn.disabled = true;
+      recordBtn.textContent = 'Voice Unsupported';
+    }
+
+    document.querySelector('form').onsubmit = () => spinner.style.display = 'inline-block';
+  </script>
+</body>
+</html>
